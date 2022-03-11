@@ -48,9 +48,46 @@ def get_dataframe(wikiurl):
     return df
 
 
-def plot_double_scatter(x_data, y_data1, y_data2, x_label='Year',
-                        y_label1='Missing Label', y_label2='Missing Label',
-                        color1='red', color2='blue'):
+def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
+    """_summary_
+
+    Args:
+        ax (_type_): _description_
+        x_data (_type_): _description_
+        y_data (_type_): _description_
+        y_label (_type_): _description_
+        color (_type_): _description_
+        scatter_type (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """    
+    ax.set_ylabel(y_label, color=color)
+    ax.plot(x_data, y_data, scatter_type, color=color)
+    ax.tick_params(axis='y', labelcolor=color)
+    return ax
+
+
+def find_best_fit(ax, x_data, y_data, color, line_type='-'):
+    """_summary_
+
+    Args:
+        ax (_type_): _description_
+        x_data (_type_): _description_
+        y_data (_type_): _description_
+        color (_type_): _description_
+        line_type (str, optional): _description_. Defaults to '-'.
+    """    
+    z = np.polyfit(x_data.values.flatten(), y_data.values.flatten(), 1)
+    p = np.poly1d(z)
+
+    ax.plot(x_data, p(x_data), line_type, color=color)
+
+
+def plot_double_scatter(x_data, y_data1, y_data2, x_label='Year', \
+                        y_label1='Missing Label', y_label2='Missing Label', \
+                        color1='red', color2='blue', scatter_type='', \
+                        fit='none'):
     """_summary_
 
     Args:
@@ -64,26 +101,27 @@ def plot_double_scatter(x_data, y_data1, y_data2, x_label='Year',
         color2 (str, optional): _description_. Defaults to 'blue'.
     """
 
-    point_type = '.'
     fig, ax1 = plt.subplots()
 
+    # Add X axis label
     ax1.set_xlabel(x_label)
-    ax1.set_ylabel(y_label1, color=color1)
-    ax1.plot(x_data, y_data1, point_type, color=color1)
-    ax1.tick_params(axis='y', labelcolor=color1)
+
+    # Add Data, Label, Color, and Point Type to 1 set of Y axis data
+    ax1 = plot_single_series(ax1, x_data, y_data1,
+                             y_label1, color1, scatter_type)
+
+    if fit in ['first', 'both']:
+        find_best_fit(ax1, x_data, y_data1, 'yellow')
 
     # Adding Twin Axes
-
     ax2 = ax1.twinx()
 
-    ax2.set_ylabel(y_label2, color=color2)
-    ax2.plot(x_data, y_data2, point_type, color=color2)
-    ax2.tick_params(axis='y', labelcolor=color2)
+    # Add Data, Label, Color, and Point Type to another set of Y axis data
+    ax2 = plot_single_series(ax2, x_data, y_data2,
+                             y_label2, color2, scatter_type)
+    
+    if fit in ['second', 'both']:
+        find_best_fit(ax2, x_data, y_data2, 'green')
 
-    # z = np.polyfit(x_data.values.flatten(), y_data1.values.flatten(), 1)
-    # print(z)
-    # p = np.poly1d(z)
-
-    # plt.plot(x_data, p(x_data), "o", color='yellow')
-
+    # Show plot
     plt.show()
