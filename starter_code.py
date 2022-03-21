@@ -23,8 +23,8 @@ data['date'] = convert_year(dates_series.str.split('-'))
 
 
 dates = data['date']
-avg_high_temp = data['avgHighTemp']
-snowfall = data["snowfall"]
+avg_high_temp = data['Average high temp']
+snowfall = data["Snowfall"]
 
 
 
