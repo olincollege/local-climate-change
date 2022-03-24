@@ -93,11 +93,12 @@ def find_best_fit(ax, x_dataset, y_dataset, color, line_type='-'):
     """_summary_
 
     Args:
-        ax (Axes): _description_
-        x_dataset (Series): _description_
-        y_dataset (Series): _description_
-        color (str): _description_
-        line_type (str, optional): _description_. Defaults to '-'.
+        ax (Axes): Axes object to plot the line of best fit on.
+        x_dataset (Series): Series of 1 set of x axis data.
+        y_dataset (Series): Series of 1 set of y axis data.
+        color (str): Color of best fit line.
+        line_type (str, optional): Style of line for the line of best fit.
+            Defaults to '-'.
     """
     z = np.polyfit(x_dataset.values.flatten(), y_dataset.values.flatten(), 1)
     p = np.poly1d(z)
