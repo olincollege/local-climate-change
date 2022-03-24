@@ -2,7 +2,36 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
+import icecream as ic
 from bs4 import BeautifulSoup
+
+plt.rcParams['figure.figsize'] = [8, 6]
+
+label_dict = {
+    'date': ['Time', 'Date'],
+    'highTemp': ['Highest Temp', 'Highest Temp (C)'],
+    'avgHighTemp': ['Average High Temp', 'Average High Temp (C)'],
+    'avgLowTemp': ['Average Low Temp', 'Average Low Temp (C)'],
+    'lowTemp': ['Lowest Temp', 'Lowest Temp (C)'],
+    'snowfall': ['Snowfall Amount', 'Snowfall (mm)'],
+    'snowfallDays': ['Snowfall Days', 'Snowfall Days']
+}
+
+month_dict = {
+    0: 'All Months',
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'November',
+    12: 'December'
+}
 
 
 def convert_year(input_year_list):
@@ -105,10 +134,39 @@ def find_best_fit(ax, x_dataset, y_dataset, color, line_type='-'):
     ax.plot(x_dataset, p(x_dataset), line_type, color=color)
 
 
-def plot_double_scatter(data, x_data, y_data1, y_data2='', x_label='Year',
-                        y_label1='Missing Label', y_label2='Missing Label',
-                        color1='red', color2='blue', scatter_type='',
-                        fit='none', month_num=0):
+def plot_bar_decade(data):
+
+    decade_totals = [0]
+
+    decades = [1891, 1901, 1911, 1921, 1931, 1941,
+               1951, 1961, 1971, 1981, 1991, 2001, 2011]
+
+    current_end_decade = 1901
+
+    current_decade_index = 0
+
+    for i, row in data.iterrows():
+        # print((row['date'] < current_end_decade).values[0])
+        if (row['date'] >= 2021).values[0]:
+            break
+
+        if (row['date'] < current_end_decade).values[0]:
+            decade_totals[current_decade_index] += row['snowfall'].values[0]
+        else:
+            decade_totals.append(row['snowfall'].values[0])
+            current_decade_index += 1
+            current_end_decade += 10
+
+    print(decades, decade_totals)
+
+    plt.bar(decades, decade_totals)
+
+    plt.show()
+
+
+def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
+                        color2='blue', scatter_type='', fit='none',
+                        month_num=0):
     """Takes a DataFrame of weather data and 1-2 column names, along with some
     other optional arguments, and plots the given columns. Can also create lines
     of best fit for the plots.
@@ -122,11 +180,6 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', x_label='Year',
         y_data2 (str, optional): DataFrame column label for 2nd y dataset.
             Expects 'date' or 'avgLowTemp' format. Defaults to '', wherein the
             function only plots 1 dataset.
-        x_label (str, optional): Label for x axis. Defaults to 'Year'.
-        y_label1 (str, optional): Label for 1st y axis. Ensure that units are
-            included in the label. Defaults to 'Missing Label'.
-        y_label2 (str, optional): Label for 2nd y axis. Ensure that units are
-            included in the label. Defaults to 'Missing Label'.
         color1 (str, optional): Color of 1st scatter plot. Defaults to 'red'.
         color2 (str, optional): Color of 2nd scatter plot. Defaults to 'blue'.
         scatter_type (str, optional): Determines the matplotlib.plot parameter
@@ -139,12 +192,13 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', x_label='Year',
             Defaults to 0, which graphs data points for all months together.
             Current implementation only allows graphing of 1 or all months.
     """
-    plt.rcParams['figure.figsize'] = [8, 6]
-
     if month_num != 0:
         data = filter_month(data, month_num)
 
     fig, ax1 = plt.subplots()
+
+    x_label = label_dict[x_data][1]
+    y_label1 = label_dict[y_data1][1]
 
     # Add X axis label
     ax1.set_xlabel(x_label)
@@ -156,7 +210,14 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', x_label='Year',
     if fit in ['first', 'both']:
         find_best_fit(ax1, data[x_data], data[y_data1], 'orange')
 
+    y_titles = label_dict[y_data1][0]
+
     if y_data2 != '':
+
+        y_titles = y_titles + " and " + label_dict[y_data2][0]
+
+        y_label2 = label_dict[y_data2][1]
+
         # Adding Twin Axes
         ax2 = ax1.twinx()
 
@@ -166,6 +227,10 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', x_label='Year',
 
         if fit in ['second', 'both']:
             find_best_fit(ax2, data[x_data], data[y_data2], 'green')
+
+    graph_title = f"{y_titles} v. {label_dict[x_data][0]} for {month_dict[month_num]}"
+
+    plt.title(graph_title)
 
     # Show plot
     plt.show()
