@@ -7,6 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 from helpers import *
 from sklearn.linear_model import LinearRegression
+import icecream as ic
 
 
 wikiurl = "https://commons.wikimedia.org/wiki/Data:Ncei.noaa.gov/weather/Boston.tab"
@@ -15,37 +16,34 @@ data = get_dataframe(wikiurl)
 # drop the unwanted columns
 data.drop(["precip", "precipDays"], axis=1, inplace = True)
 data.drop(range(226), axis = 0, inplace = True)
-
+data.reset_index(drop=True, inplace=True)
 
 dates_series = pd.Series(data.date.values.flatten())
 
 data['date'] = convert_year(dates_series.str.split('-'))
 
+# print((data['date']).tail(50))
 
-dates = data['date']
-avg_high_temp = data['Average high temp']
-snowfall = data["Snowfall"]
-
-
+plot_bar_decade(data.copy())
 
 
 # plt.plot(dates.tail(500), snowfall.tail(500), ".", label = 'Snowfall (mm)', c = 'blue')
 # plt.plot(dates.tail(500), high_temp.tail(500), ".", label = 'High Temp (C)', c = 'red')
 
-fig, ax1 = plt.subplots() 
+# fig, ax1 = plt.subplots() 
   
-ax1.set_xlabel('Year') 
-ax1.set_ylabel('Average High Temperature (C)', color = 'red') 
-ax1.plot(dates, avg_high_temp, color = 'red') 
-ax1.tick_params(axis ='y', labelcolor = 'red') 
+# ax1.set_xlabel('Year') 
+# ax1.set_ylabel('Average High Temperature (C)', color = 'red') 
+# ax1.plot(dates, avg_high_temp, color = 'red') 
+# ax1.tick_params(axis ='y', labelcolor = 'red') 
   
-# Adding Twin Axes
+# # Adding Twin Axes
 
-ax2 = ax1.twinx() 
+# ax2 = ax1.twinx() 
   
-ax2.set_ylabel('Snowfall (mm)', color = 'blue') 
-ax2.plot(dates, snowfall, color = 'blue') 
-ax2.tick_params(axis ='y', labelcolor = 'blue') 
+# ax2.set_ylabel('Snowfall (mm)', color = 'blue') 
+# ax2.plot(dates, snowfall, color = 'blue') 
+# ax2.tick_params(axis ='y', labelcolor = 'blue') 
 
 # print(dates.values.flatten()[0:3])
 # z = np.polyfit(dates.values.flatten(), snowfall.values.flatten(), 2)
@@ -66,7 +64,7 @@ ax2.tick_params(axis ='y', labelcolor = 'blue')
 # plt.xlabel("Year")
 # plt.ylabel("Snowfall (mm)")
 
-plt.show()
+# plt.show()
 
 # plt.regplot(x=dates_converted[-500:],y=snowfall.tail(500), fit_reg=True) 
 
