@@ -2,10 +2,11 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
-import icecream as ic
+import scipy as scp
+# import icecream as ic
 from bs4 import BeautifulSoup
 
-plt.rcParams['figure.figsize'] = [8, 6]
+plt.rcParams['figure.figsize'] = [12, 6]
 
 label_dict = {
     'date': ['Time', 'Date'],
@@ -118,7 +119,7 @@ def filter_month(data, month_num):
     return data
 
 
-def find_best_fit(ax, x_dataset, y_dataset, color, line_type='-'):
+def find_best_fit(ax, x_dataset, y_dataset, color, fit_degree, line_type='-'):
     """_summary_
 
     Args:
@@ -129,8 +130,26 @@ def find_best_fit(ax, x_dataset, y_dataset, color, line_type='-'):
         line_type (str, optional): Style of line for the line of best fit.
             Defaults to '-'.
     """
-    z = np.polyfit(x_dataset.values.flatten(), y_dataset.values.flatten(), 1)
+    z = np.polyfit(x_dataset.values.flatten(),
+                   y_dataset.values.flatten(), fit_degree)
     p = np.poly1d(z)
+
+    # print(z)
+
+    # coeff = z[0]
+
+    # ### Residual or Sum of Square Error (SSE)
+    # SSE = z[1]
+
+    # ### Determining the Sum of Square Total (SST)
+    # ## the squared differences between the observed dependent variable and its mean
+    # diff = y_dataset.values.flatten() - y_dataset.values.flatten().mean()
+    # square_diff = diff ** 2
+    # SST = square_diff.sum()
+
+    # ###  Now getting the coefficient of determination (R2)
+    # R2 = 1 - SSE/SST
+    # print(R2)
 
     ax.plot(x_dataset, p(x_dataset), line_type, color=color)
 
@@ -165,9 +184,61 @@ def plot_bar_decade(data):
     plt.show()
 
 
+def plot_in_between(data, x_data, y_data1, y_data2='', color1='red',
+                    color2='blue', month_num=0, fit_degree=1):
+
+    if month_num != 0:
+        data = filter_month(data, month_num)
+
+    fig, ax1 = plt.subplots()
+
+    x_label = label_dict[x_data][1]
+    y_label1 = label_dict[y_data1][1]
+
+    # Add X axis label
+    ax1.set_xlabel(x_label)
+
+    z1 = np.polyfit(data[x_data].values.flatten(),
+                    data[y_data1].values.flatten(), fit_degree)
+    p1 = np.poly1d(z1)
+
+    fit1_flat = [item for sublist in p1(data[x_data]) for item in sublist]
+
+    ax1.plot(data[x_data], fit1_flat, '-', color=color1)
+
+    # y_titles = label_dict[y_data1][0]
+
+    # y_titles = y_titles + " and " + label_dict[y_data2][0]
+
+    # y_label2 = label_dict[y_data2][1]
+
+    # Adding Twin Axes
+    # ax2 = ax1.twinx()
+
+    z2 = np.polyfit(data[x_data].values.flatten(),
+                    data[y_data2].values.flatten(), fit_degree)
+    p2 = np.poly1d(z2)
+
+    fit2_flat = [item for sublist in p2(data[x_data]) for item in sublist]
+
+    ax1.plot(data[x_data], fit2_flat, '-', color=color2)
+
+    ax1.fill_between(data[x_data].values.flatten(),
+                     fit1_flat, fit2_flat, alpha=.5, linewidth=0)
+
+    ax1.plot(data[x_data], np.subtract(fit1_flat, fit2_flat), '-', color='purple')
+
+    # graph_title = f"{y_titles} v. {label_dict[x_data][0]} for {month_dict[month_num]}"
+
+    # plt.title(graph_title)
+
+    # Show plot
+    plt.show()
+
+
 def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
                         color2='blue', scatter_type='', fit='none',
-                        month_num=0):
+                        month_num=0, fit_degree=1):
     """Takes a DataFrame of weather data and 1-2 column names, along with some
     other optional arguments, and plots the given columns. Can also create lines
     of best fit for the plots.
@@ -209,7 +280,7 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
                              y_label1, color1, scatter_type)
 
     if fit in ['first', 'both']:
-        find_best_fit(ax1, data[x_data], data[y_data1], 'orange')
+        find_best_fit(ax1, data[x_data], data[y_data1], 'orange', fit_degree)
 
     y_titles = label_dict[y_data1][0]
 
@@ -227,7 +298,8 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
                                  y_label2, color2, scatter_type)
 
         if fit in ['second', 'both']:
-            find_best_fit(ax2, data[x_data], data[y_data2], 'green')
+            find_best_fit(ax2, data[x_data],
+                          data[y_data2], 'green', fit_degree)
 
     graph_title = f"{y_titles} v. {label_dict[x_data][0]} for {month_dict[month_num]}"
 

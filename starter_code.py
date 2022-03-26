@@ -6,8 +6,7 @@ import seaborn as sns
 import requests
 from bs4 import BeautifulSoup
 from helpers import *
-from sklearn.linear_model import LinearRegression
-import icecream as ic
+# from sklearn.linear_model import LinearRegression
 
 
 wikiurl = "https://commons.wikimedia.org/wiki/Data:Ncei.noaa.gov/weather/Boston.tab"
