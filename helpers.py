@@ -2,52 +2,30 @@ import pandas as pd
 import requests
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as scp
-# import icecream as ic
 from bs4 import BeautifulSoup
+from numpy.polynomial import Polynomial as P
+from constants import *
 
+# Set size of graphs [width, height]
 plt.rcParams['figure.figsize'] = [12, 6]
 
-label_dict = {
-    'date': ['Time', 'Date'],
-    'highTemp': ['Highest Temp', 'Highest Temp (C)'],
-    'avgHighTemp': ['Average High Temp', 'Average High Temp (C)'],
-    'avgLowTemp': ['Average Low Temp', 'Average Low Temp (C)'],
-    'lowTemp': ['Lowest Temp', 'Lowest Temp (C)'],
-    'snowfall': ['Snowfall Amount', 'Snowfall (mm)'],
-    'snowfallDays': ['Snowfall Days', 'Snowfall Days']
-}
 
-month_dict = {
-    0: 'All Months',
-    1: 'January',
-    2: 'February',
-    3: 'March',
-    4: 'April',
-    5: 'May',
-    6: 'June',
-    7: 'July',
-    8: 'August',
-    9: 'September',
-    10: 'October',
-    11: 'November',
-    12: 'December'
-}
-
-
-def convert_year(input_year_list):
-    """_summary_
+def convert_year(input_year_series):
+    """In our data, the dates come in the format '2022-03', but we want them
+    in the form of floats so we can do calculations and graph them. This
+    function converts an incoming Series of dates into floats and returns a
+    list of float dates.
 
     Args:
-        input_year_list (Series): _description_
+        input_year_series (Series): Series of string dates
 
     Returns:
-        list: _description_
+        list: List of float dates
     """
     added_list = []
-    for i in range(len(input_year_list)):
-        month = float(input_year_list[i][1]) / 12
-        year = input_year_list[i][0]
+    for i in range(len(input_year_series)):
+        month = float(input_year_series[i][1]) / 12
+        year = input_year_series[i][0]
         added_list.append(float(year) + month)
     return added_list
 
@@ -63,9 +41,8 @@ def get_dataframe(wikiurl):
     """
 
     # get the response in the form of html
-    table_class = "mw-tabular sortable jquery-tablesorter"
+    # table_class = "mw-tabular sortable jquery-tablesorter"
     response = requests.get(wikiurl)
-    # print(response.status_code)
 
     # parse data from the html into a beautifulsoup object
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -76,6 +53,32 @@ def get_dataframe(wikiurl):
     df = pd.DataFrame(df[0])
 
     return df
+
+
+def compile_CSVs():
+    """Loops through all of the listed cities and reads from each of the 
+    corresponding CSVs. Saves each of these DataFrames into a dictionary.
+
+    Args:
+        None
+
+    Returns:
+        dict: Returns dictionary with city names as keys and DataFrames as 
+                values.
+    """
+
+    # Creates empty dictionary for DataFrames to be added to.
+    df_dict = {}
+
+    # Loops through cities
+    for city in CITIES:
+        # For each city, pull from CSV, save to DataFrame (while skipping 
+        # extra header rows) and save into dictionary.
+        df_dict[city] = pd.read_csv(
+            f'data/{CITIES[city][0]}_weather.csv', skiprows=[1, 2])
+
+    # Return this new dictionary of DataFrames
+    return df_dict
 
 
 def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
@@ -130,54 +133,42 @@ def find_best_fit(ax, x_dataset, y_dataset, color, fit_degree, line_type='-'):
         line_type (str, optional): Style of line for the line of best fit.
             Defaults to '-'.
     """
-    z = np.polyfit(x_dataset.values.flatten(),
-                   y_dataset.values.flatten(), fit_degree)
-    p = np.poly1d(z)
 
-    # print(z)
-
-    # coeff = z[0]
-
-    # ### Residual or Sum of Square Error (SSE)
-    # SSE = z[1]
-
-    # ### Determining the Sum of Square Total (SST)
-    # ## the squared differences between the observed dependent variable and its mean
-    # diff = y_dataset.values.flatten() - y_dataset.values.flatten().mean()
-    # square_diff = diff ** 2
-    # SST = square_diff.sum()
-
-    # ###  Now getting the coefficient of determination (R2)
-    # R2 = 1 - SSE/SST
-    # print(R2)
+    p = P.fit(x_dataset.values.flatten(),
+              y_dataset.values.flatten(), fit_degree)
 
     ax.plot(x_dataset, p(x_dataset), line_type, color=color)
 
 
-def plot_bar_decade(data):
+def plot_bar_decade(data, date_range, y_data):
+    """_summary_
 
+    Args:
+        data (_type_): _description_
+        date_range (_type_): _description_
+        y_data (_type_): _description_
+    """
     decade_totals = [0]
 
-    decades = [1891, 1901, 1911, 1921, 1931, 1941,
-               1951, 1961, 1971, 1981, 1991, 2001, 2011]
+    decades = range(date_range[0], date_range[1], 10)
 
-    current_end_decade = 1901
+    current_end_decade = decades[1]
 
     current_decade_index = 0
 
     for i, row in data.iterrows():
-        # print((row['date'] < current_end_decade).values[0])
-        if (row['date'] >= 2021).values[0]:
+        if row['date'] >= date_range[1]:
             break
 
-        if (row['date'] < current_end_decade).values[0]:
-            decade_totals[current_decade_index] += row['snowfall'].values[0]
+        if row['date'] < current_end_decade:
+            if np.isnan(row[y_data]):
+                print(f"Warning: Found NaN value at {row['date']}")
+            else:
+                decade_totals[current_decade_index] += row[y_data]
         else:
-            decade_totals.append(row['snowfall'].values[0])
+            decade_totals.append(row[y_data])
             current_decade_index += 1
             current_end_decade += 10
-
-    print(decades, decade_totals)
 
     plt.bar(decades, decade_totals)
 
@@ -192,43 +183,39 @@ def plot_in_between(data, x_data, y_data1, y_data2='', color1='red',
 
     fig, ax1 = plt.subplots()
 
-    x_label = label_dict[x_data][1]
-    y_label1 = label_dict[y_data1][1]
+    x_label = LABEL_DICT[x_data][1]
+    y_label1 = LABEL_DICT[y_data1][1]
 
     # Add X axis label
     ax1.set_xlabel(x_label)
 
-    z1 = np.polyfit(data[x_data].values.flatten(),
-                    data[y_data1].values.flatten(), fit_degree)
-    p1 = np.poly1d(z1)
+    p1 = P.fit(data[x_data].values.flatten(),
+               data[y_data1].values.flatten(), fit_degree)
 
-    fit1_flat = [item for sublist in p1(data[x_data]) for item in sublist]
+    fit1_flat = p1(data[x_data]).values.flatten()
 
     ax1.plot(data[x_data], fit1_flat, '-', color=color1)
 
-    # y_titles = label_dict[y_data1][0]
+    # y_titles = LABEL_DICT[y_data1][0]
 
-    # y_titles = y_titles + " and " + label_dict[y_data2][0]
+    # y_titles = y_titles + " and " + LABEL_DICT[y_data2][0]
 
-    # y_label2 = label_dict[y_data2][1]
+    # y_label2 = LABEL_DICT[y_data2][1]
 
-    # Adding Twin Axes
-    # ax2 = ax1.twinx()
+    p2 = P.fit(data[x_data].values.flatten(),
+               data[y_data2].values.flatten(), fit_degree)
 
-    z2 = np.polyfit(data[x_data].values.flatten(),
-                    data[y_data2].values.flatten(), fit_degree)
-    p2 = np.poly1d(z2)
-
-    fit2_flat = [item for sublist in p2(data[x_data]) for item in sublist]
+    fit2_flat = p2(data[x_data]).values.flatten()
 
     ax1.plot(data[x_data], fit2_flat, '-', color=color2)
 
     ax1.fill_between(data[x_data].values.flatten(),
                      fit1_flat, fit2_flat, alpha=.5, linewidth=0)
 
-    ax1.plot(data[x_data], np.subtract(fit1_flat, fit2_flat), '-', color='purple')
+    # ax1.plot(data[x_data], np.subtract(
+    #     fit1_flat, fit2_flat), '-', color='purple')
 
-    # graph_title = f"{y_titles} v. {label_dict[x_data][0]} for {month_dict[month_num]}"
+    # graph_title = f"{y_titles} v. {LABEL_DICT[x_data][0]} for {MONTH_DICT[month_num]}"
 
     # plt.title(graph_title)
 
@@ -269,8 +256,8 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
 
     fig, ax1 = plt.subplots()
 
-    x_label = label_dict[x_data][1]
-    y_label1 = label_dict[y_data1][1]
+    x_label = LABEL_DICT[x_data][1]
+    y_label1 = LABEL_DICT[y_data1][1]
 
     # Add X axis label
     ax1.set_xlabel(x_label)
@@ -282,13 +269,13 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
     if fit in ['first', 'both']:
         find_best_fit(ax1, data[x_data], data[y_data1], 'orange', fit_degree)
 
-    y_titles = label_dict[y_data1][0]
+    y_titles = LABEL_DICT[y_data1][0]
 
     if y_data2 != '':
 
-        y_titles = y_titles + " and " + label_dict[y_data2][0]
+        y_titles = y_titles + " and " + LABEL_DICT[y_data2][0]
 
-        y_label2 = label_dict[y_data2][1]
+        y_label2 = LABEL_DICT[y_data2][1]
 
         # Adding Twin Axes
         ax2 = ax1.twinx()
@@ -301,7 +288,7 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
             find_best_fit(ax2, data[x_data],
                           data[y_data2], 'green', fit_degree)
 
-    graph_title = f"{y_titles} v. {label_dict[x_data][0]} for {month_dict[month_num]}"
+    graph_title = f"{y_titles} v. {LABEL_DICT[x_data][0]} for {MONTH_DICT[month_num]}"
 
     plt.title(graph_title)
 
