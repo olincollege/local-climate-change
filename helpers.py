@@ -99,6 +99,7 @@ def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
     ax.plot(x_data, y_data, scatter_type, color=color)
     ax.tick_params(axis='y', labelcolor=color)
     return ax
+    # ! Can this be tested? It does return, but it's only purpose is to plot
 
 
 def filter_month(data, month_num):
@@ -177,7 +178,18 @@ def plot_bar_decade(data, date_range, y_data):
 
 def plot_in_between(data, x_data, y_data1, y_data2='', color1='red',
                     color2='blue', month_num=0, fit_degree=1):
+    """_summary_
 
+    Args:
+        data (_type_): _description_
+        x_data (_type_): _description_
+        y_data1 (_type_): _description_
+        y_data2 (str, optional): _description_. Defaults to ''.
+        color1 (str, optional): _description_. Defaults to 'red'.
+        color2 (str, optional): _description_. Defaults to 'blue'.
+        month_num (int, optional): _description_. Defaults to 0.
+        fit_degree (int, optional): _description_. Defaults to 1.
+    """
     if month_num != 0:
         data = filter_month(data, month_num)
 
@@ -196,6 +208,7 @@ def plot_in_between(data, x_data, y_data1, y_data2='', color1='red',
 
     ax1.plot(data[x_data], fit1_flat, '-', color=color1)
 
+    # ! Add graph titles here
     # y_titles = LABEL_DICT[y_data1][0]
 
     # y_titles = y_titles + " and " + LABEL_DICT[y_data2][0]
@@ -212,6 +225,7 @@ def plot_in_between(data, x_data, y_data1, y_data2='', color1='red',
     ax1.fill_between(data[x_data].values.flatten(),
                      fit1_flat, fit2_flat, alpha=.5, linewidth=0)
 
+    # ! Add more graph titles here
     # ax1.plot(data[x_data], np.subtract(
     #     fit1_flat, fit2_flat), '-', color='purple')
 
