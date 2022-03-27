@@ -6,7 +6,7 @@ DEFAULT_URL = \
 CITIES = {
     'Boston': ['boston', 226],
     'New York City': ['new_york_city', 12],
-    'Chicago': ['chicago', 156],
+    'Chicago': ['chicago', 150],
     'Denver': ['denver', 120]
 }
 
