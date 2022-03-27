@@ -68,3 +68,60 @@ plot_bar_decade(data.copy())
 # plt.regplot(x=dates_converted[-500:],y=snowfall.tail(500), fit_reg=True) 
 
 
+
+
+
+
+
+# Andrew's in between testing
+
+# #testing in between visualization
+
+# #make data
+# x = np.linspace(-5, 5, 16)
+# y1 = x**2-3
+# y2 = x
+
+# #plot
+# fig, ax = plt.subplots()
+
+# #plot
+# ax.plot(x,y1)
+# ax.plot(x,y2)
+
+# #fill between
+# ax.fill_between(x, y1, y2, alpha=0.25, linewidth=1)
+
+# ax.set(xlim=(-5, 5), xticks=np.arange(-5, 5),
+#        ylim=(-5, 5), yticks=np.arange(-5, 5))
+
+# #axis labels
+# ax.set_xlabel("x numbers")
+# ax.set_ylabel("cool blue numbers")
+
+# #twin axes
+# ax2 = ax.twinx()
+# ax2.set_ylabel("hot red numbers")
+
+# plt.show()
+
+
+
+
+# #in between visualization for boston data
+
+# fig, ax1 = plt.subplots()
+# print(type(boston_data["date"]))
+# print(boston_data["date"])
+# ax1.fill_between(boston_data["date"].values.flatten(), boston_data["avgHighTemp"].values.flatten(), boston_data["avgLowTemp"].values.flatten(), alpha=.5, linewidth=0)
+
+# # Add axis label
+# ax1.set_xlabel("date")
+# ax1.set_ylabel("avgHighTemp")
+
+# #add twin axes
+# ax2 = ax1.twinx()
+# ax2.set_ylabel("avgLowTemp")
+
+# #show plot
+# plt.show()
