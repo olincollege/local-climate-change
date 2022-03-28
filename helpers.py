@@ -63,6 +63,7 @@ def get_dataframe(wikiurl):
 
     return df
 
+
 def clean_data(dataframe, city):
     """_summary_
 
@@ -173,7 +174,7 @@ def filter_month(data, month_num):
     return data
 
 
-def find_best_fit(ax, x_dataset, y_dataset, color, fit_degree, line_type='-'):
+def find_best_fit(data, x_data, y_data, fit_degree):
     """Find line of best fit of a set of X and Y data. Can also take a degree
     of polynomial fit.
 
@@ -185,14 +186,21 @@ def find_best_fit(ax, x_dataset, y_dataset, color, fit_degree, line_type='-'):
         fit_degree (int): Degree of polynomial fit.
         line_type (str, optional): Style of line for the line of best fit.
             Defaults to '-'.
+
+    Returns:
+
     """
+    # ! update docstring and comments
+    data.dropna(axis='rows', subset=[x_data, y_data], inplace=True)
+
+    x_dataset = data[x_data]
+    y_dataset = data[y_data]
 
     # Find polynomial fit
     p = P.fit(x_dataset.values.flatten(),
               y_dataset.values.flatten(), fit_degree)
 
-    # Plot line of best fit
-    ax.plot(x_dataset, p(x_dataset), line_type, color=color)
+    return p
 
 
 def plot_bar_decade(data, date_range, y_data):
@@ -242,6 +250,12 @@ def plot_bar_decade(data, date_range, y_data):
             current_decade_index += 1
             current_end_decade += 10
 
+    # ! Add axis labels and title
+    plt.xlabel(LABEL_DICT['date'][1])
+    plt.ylabel(f"Total {LABEL_DICT[y_data][1]}")
+
+    plt.title(f"Cumulative {LABEL_DICT[y_data][0]} by Decade")
+
     # Create bar plot
     plt.bar(decades, decade_totals)
 
@@ -287,8 +301,7 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     ax1.set_xlabel(x_label)
 
     # Find fit line of 1st dataset
-    p1 = P.fit(data[x_data].values.flatten(),
-               data[y_data1].values.flatten(), fit_degree)
+    p1 = find_best_fit(data, x_data, y_data1, fit_degree)
 
     # Flatten fit line for plotting
     fit1_flat = p1(data[x_data]).values.flatten()
@@ -300,8 +313,7 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     ax1.set_ylabel(f"{y_label1} and {y_label2}")
 
     # Find fit line of 2nd dataset
-    p2 = P.fit(data[x_data].values.flatten(),
-               data[y_data2].values.flatten(), fit_degree)
+    p2 = find_best_fit(data, x_data, y_data2, fit_degree)
 
     # Flatten fit line for plotting
     fit2_flat = p2(data[x_data]).values.flatten()
@@ -381,7 +393,10 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
 
     # Find best fit of first dataset if requested
     if fit in ['first', 'both']:
-        find_best_fit(ax1, data[x_data], data[y_data1], color1, fit_degree)
+        p1 = find_best_fit(data, x_data, y_data1, fit_degree)
+
+        # Plot line of best fit
+        ax1.plot(data[x_data], p1(data[x_data]), '-', color=color1)
 
     # Add stylized title for 1st Y axis
     y_titles = LABEL_DICT[y_data1][0]
@@ -404,8 +419,10 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
 
         # Find best fit of second dataset if requested
         if fit in ['second', 'both']:
-            find_best_fit(ax2, data[x_data],
-                          data[y_data2], color2, fit_degree)
+            p2 = find_best_fit(data, x_data, y_data2, fit_degree)
+
+            # Plot line of best fit
+            ax2.plot(data[x_data], p2(data[x_data]), '-', color=color2)
 
     # Concatenate graph titles into fully auto-generated graph title
     graph_title = f"{y_titles} v. {LABEL_DICT[x_data][0]} for {MONTH_DICT[month_num]}"
