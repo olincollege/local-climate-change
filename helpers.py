@@ -132,7 +132,7 @@ def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
     ax.set_ylabel(y_label, color=color)
 
     # Plot single set of data
-    ax.plot(x_data, y_data, scatter_type, color=color)
+    ax.plot(x_data, y_data, scatter_type, color=color, alpha=0.4)
 
     # Add axis tick marks
     ax.tick_params(axis='y', labelcolor=color)
@@ -381,7 +381,7 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
 
     # Find best fit of first dataset if requested
     if fit in ['first', 'both']:
-        find_best_fit(ax1, data[x_data], data[y_data1], 'orange', fit_degree)
+        find_best_fit(ax1, data[x_data], data[y_data1], color1, fit_degree)
 
     # Add stylized title for 1st Y axis
     y_titles = LABEL_DICT[y_data1][0]
@@ -405,7 +405,7 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
         # Find best fit of second dataset if requested
         if fit in ['second', 'both']:
             find_best_fit(ax2, data[x_data],
-                          data[y_data2], 'green', fit_degree)
+                          data[y_data2], color2, fit_degree)
 
     # Concatenate graph titles into fully auto-generated graph title
     graph_title = f"{y_titles} v. {LABEL_DICT[x_data][0]} for {MONTH_DICT[month_num]}"
