@@ -2,8 +2,8 @@ import pytest
 
 from helpers import (
     convert_year,
-    # get_dataframe,
-    # compile_CSVs,
+    compile_CSVs,
+    clean_data,
     filter_month
 )
 

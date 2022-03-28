@@ -63,6 +63,28 @@ def get_dataframe(wikiurl):
 
     return df
 
+def clean_data(dataframe, city):
+    """_summary_
+
+    Args:
+        dataframe (DataFrame): _description_
+        city (str): _description_
+
+    Returns:
+        DataFrame: _description_
+    """
+    # Remove first X rows and reindex because some cities have a bunch of data
+    # missing in the first few years.
+    dataframe.drop(range(CITIES[city][1]), axis=0, inplace=True)
+
+    # Create Series of just the dates datapoints
+    dates_series = pd.Series(dataframe.date.values.flatten())
+
+    # Using helper function, replace dates column with float-ified dates
+    dataframe['date'] = convert_year(dates_series.str.split('-'))
+
+    return dataframe
+
 
 def compile_CSVs():
     """Loops through all of the listed cities and reads from each of the 

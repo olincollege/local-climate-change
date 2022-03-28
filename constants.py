@@ -12,7 +12,7 @@ CITIES = {
     'Detroit': ['detroit', 132],
     # 'Atlanta': ['atlanta', ],
     'Anchorage, Alaska': ['anchorage', 2],
-    'London': ['london', 1],
+    # 'London': ['london', 1],
     'Minneapolis': ['minneapolis', 147]
 }
 
