@@ -13,7 +13,8 @@ CITIES = {
     # 'Atlanta': ['atlanta', ],
     'Anchorage, Alaska': ['anchorage', 2],
     # 'London': ['london', 1],
-    'Minneapolis': ['minneapolis', 147]
+    'Minneapolis': ['minneapolis', 147],
+    'Temperature Experiment': ['test', 0]
 }
 
 # 'columnHeader': ['For Graph Title', 'For Graph Axis Labels']
@@ -23,6 +24,8 @@ LABEL_DICT = {
     'avgHighTemp': ['Average High Temp', 'Average High Temp (C)'],
     'avgLowTemp': ['Average Low Temp', 'Average Low Temp (C)'],
     'lowTemp': ['Lowest Temp', 'Lowest Temp (C)'],
+    'precip': ['Precipitation', 'Precipitation (mm)'],
+    'precipDays': ['Precipitation Days', 'Precipitation Days'],
     'snowfall': ['Snowfall Amount', 'Snowfall (mm)'],
     'snowfallDays': ['Snowfall Days', 'Snowfall Days']
 }
