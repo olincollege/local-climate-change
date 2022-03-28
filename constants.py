@@ -7,7 +7,13 @@ CITIES = {
     'Boston': ['boston', 226],
     'New York City': ['new_york_city', 12],
     'Chicago': ['chicago', 150],
-    'Denver': ['denver', 120]
+    'Denver': ['denver', 120],
+    'Bismarck, North Dakota': ['bismarck', 135],
+    'Detroit': ['detroit', 132],
+    # 'Atlanta': ['atlanta', ],
+    'Anchorage, Alaska': ['anchorage', 2],
+    'London': ['london', 1],
+    'Minneapolis': ['minneapolis', 147]
 }
 
 # 'columnHeader': ['For Graph Title', 'For Graph Axis Labels']
