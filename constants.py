@@ -14,7 +14,7 @@ CITIES = {
     'Anchorage, Alaska': ['anchorage', 2],
     # 'London': ['london', 1],
     'Minneapolis': ['minneapolis', 147],
-    'Temperature Experiment': ['test', 0]
+    'Temperature Experiment': ['test', 12]
 }
 
 # 'columnHeader': ['For Graph Title', 'For Graph Axis Labels']
