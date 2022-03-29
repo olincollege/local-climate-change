@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from bs4 import BeautifulSoup
 from numpy.polynomial import Polynomial as P
+
+# Import from our constants file
 from constants import *
 
 # Set size of graphs [width, height]
@@ -11,7 +13,8 @@ plt.rcParams['figure.figsize'] = [12, 6]
 
 
 def convert_year(input_year_series):
-    """In our data, the dates come in the format '2022-03', but we want them
+    """
+    In our data, the dates come in the format '2022-03', but we want them
     in the form of floats so we can do calculations and graph them. This
     function converts an incoming Series of dates into floats and returns a
     list of float dates.
@@ -38,7 +41,8 @@ def convert_year(input_year_series):
 
 
 def get_dataframe(wikiurl):
-    """Takes WikiMedia URL of weather dataset, returns the datatable from the
+    """
+    Takes WikiMedia URL of weather dataset, returns the datatable from the
     webpage in the form of a DataFrame.
 
     Args:
@@ -65,14 +69,19 @@ def get_dataframe(wikiurl):
 
 
 def clean_data(dataframe, city):
-    """_summary_
+    """
+    Takes DataFrame for one city's weather data, removes specified number of
+    rows from beginning of DataFrame, converts date values from hyphenated
+    strings to fractional floats, and returns cleaned DataFrame.
 
     Args:
-        dataframe (DataFrame): _description_
-        city (str): _description_
+        dataframe (DataFrame): raw set of data for one city
+        city (str): name of city corresponding to current dataset, used to
+            find number of starting rows to drop.
 
     Returns:
-        DataFrame: _description_
+        DataFrame: Returns DataFrame after initial rows have been dropped and
+            dates reformatted.
     """
     # Remove first X rows and reindex because some cities have a bunch of data
     # missing in the first few years.
@@ -88,7 +97,8 @@ def clean_data(dataframe, city):
 
 
 def compile_CSVs():
-    """Loops through all of the listed cities and reads from each of the 
+    """
+    Loops through all of the listed cities and reads from each of the 
     corresponding CSVs. Saves each of these DataFrames into a dictionary.
 
     Args:
@@ -114,7 +124,8 @@ def compile_CSVs():
 
 
 def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
-    """Takes one set of X data and one set of Y data and plots a scatter plot on
+    """
+    Takes one set of X data and one set of Y data and plots a scatter plot on
     the given Axes, returning the modified Axes.
 
     Args:
@@ -139,11 +150,11 @@ def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
     ax.tick_params(axis='y', labelcolor=color)
 
     return ax
-    # ! Can this be tested? It does return, but it's only purpose is to plot
 
 
 def filter_month(data, month_num):
-    """Takes DataFrame and number of month to filter data for. Drops all rows
+    """
+    Takes DataFrame and number of month to filter data for. Drops all rows
     from DataFrame except for those of the requested month.
 
     Args:
@@ -175,22 +186,22 @@ def filter_month(data, month_num):
 
 
 def find_best_fit(data, x_data, y_data, fit_degree):
-    """Find line of best fit of a set of X and Y data. Can also take a degree
+    """
+    Find line of best fit of a set of X and Y data. Can also take a degree
     of polynomial fit.
 
     Args:
-        ax (Axes): Axes object to plot the line of best fit on.
-        x_dataset (Series): Series of 1 set of x axis data.
-        y_dataset (Series): Series of 1 set of y axis data.
-        color (str): Color of best fit line.
+        data (DataFrame): DataFrame object to calculate line of best fit from.
+        x_data (str): Column header for x data
+        y_data (str): Column header for y data
         fit_degree (int): Degree of polynomial fit.
-        line_type (str, optional): Style of line for the line of best fit.
-            Defaults to '-'.
 
     Returns:
-
+        p (Series): Series containing polynomial fit equation
     """
-    # ! update docstring and comments
+
+    # Drop any rows with NaN values in the columns we are using, to not upset
+    # the fit function.
     data.dropna(axis='rows', subset=[x_data, y_data], inplace=True)
 
     x_dataset = data[x_data]
@@ -204,7 +215,8 @@ def find_best_fit(data, x_data, y_data, fit_degree):
 
 
 def plot_bar_decade(data, date_range, y_data):
-    """For a certain category of Y data and a certain date range, plot a bar
+    """
+    For a certain category of Y data and a certain date range, plot a bar
     graph of total values by decade. For example, graphs sum of snowfall for
     each decade from 1891 to 2021.
 
@@ -250,7 +262,7 @@ def plot_bar_decade(data, date_range, y_data):
             current_decade_index += 1
             current_end_decade += 10
 
-    # ! Add axis labels and title
+    # Add axis labels and title
     plt.xlabel(LABEL_DICT['date'][1])
     plt.ylabel(f"Total {LABEL_DICT[y_data][1]}")
 
@@ -264,7 +276,8 @@ def plot_bar_decade(data, date_range, y_data):
 
 def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
                     color2='blue', month_num=0, fit_degree=1):
-    """Graphs lines of best fit for 2 datasets, fills area between these two
+    """
+    Graphs lines of best fit for 2 datasets, fills area between these two
     lines.
 
     Args:
@@ -325,10 +338,6 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     ax1.fill_between(data[x_data].values.flatten(),
                      fit1_flat, fit2_flat, alpha=.5, linewidth=0)
 
-    # ! Can graph size of in-between space over time
-    # ax1.plot(data[x_data], np.subtract(
-    #     fit1_flat, fit2_flat), '-', color='purple')
-
     # Concatenate both Y titles
     y_titles = LABEL_DICT[y_data1][0] + " and " + LABEL_DICT[y_data2][0]
 
@@ -345,7 +354,8 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
 def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
                         color2='blue', scatter_type='', fit='none',
                         month_num=0, fit_degree=1):
-    """Takes a DataFrame of weather data and 1-2 column names, along with some
+    """
+    Takes a DataFrame of weather data and 1-2 column names, along with some
     other optional arguments, and plots the given columns. Can also create lines
     of best fit for the plots.
 
