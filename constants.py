@@ -1,3 +1,7 @@
+"""
+Stores constants (strings and dictionaries) for use in helper functions.
+"""
+
 # URL = DEFAULT_URL + `City Name` + '.tab'
 DEFAULT_URL = \
     'https://commons.wikimedia.org/wiki/Data:Ncei.noaa.gov/weather/'
@@ -20,7 +24,6 @@ CITIES = {
     'clean data test 3': ['clean 3', 1],
     'clean data test 4': ['clean 4', 2]
 }
-print(len(CITIES))
 
 # 'columnHeader': ['For Graph Title', 'For Graph Axis Labels']
 LABEL_DICT = {

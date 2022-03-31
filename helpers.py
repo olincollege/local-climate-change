@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from numpy.polynomial import Polynomial as P
 
 # Import from our constants file
-from constants import *
+from constants import CITIES, LABEL_DICT, MONTH_DICT
 
 # Set size of graphs [width, height]
 plt.rcParams['figure.figsize'] = [12, 6]
@@ -46,7 +46,7 @@ def get_dataframe(wikiurl):
     webpage in the form of a DataFrame.
 
     Args:
-        wikiurl (str): Full URL for WikiMedia page with dataset for particular 
+        wikiurl (str): Full URL for WikiMedia page with dataset for particular
             city
 
     Returns:
@@ -60,12 +60,12 @@ def get_dataframe(wikiurl):
     soup = BeautifulSoup(response.text, 'html.parser')
     weather_table = soup.find('table', {'class': "mw-tabular"})
 
-    df = pd.read_html(str(weather_table))
+    data = pd.read_html(str(weather_table))
 
     # convert list to dataframe
-    df = pd.DataFrame(df[0])
+    data = pd.DataFrame(data[0])
 
-    return df
+    return data
 
 
 def clean_data(dataframe, city):
@@ -99,14 +99,14 @@ def clean_data(dataframe, city):
 
 def compile_CSVs():
     """
-    Loops through all of the listed cities and reads from each of the 
+    Loops through all of the listed cities and reads from each of the
     corresponding CSVs. Saves each of these DataFrames into a dictionary.
 
     Args:
         None
 
     Returns:
-        dict: Returns dictionary with city names as keys and DataFrames as 
+        dict: Returns dictionary with city names as keys and DataFrames as
             values.
     """
 
@@ -162,7 +162,7 @@ def filter_month(data, month_num):
 
     Args:
         data (DataFrame): DataFrame of all data for current city.
-        month_num (int): Number of month to filter data for (1 = January, 12 = 
+        month_num (int): Number of month to filter data for (1 = January, 12 =
             December, etc)
 
     Returns:
@@ -317,10 +317,10 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     ax1.set_xlabel(x_label)
 
     # Find fit line of 1st dataset
-    p1 = find_best_fit(data, x_data, y_data1, fit_degree)
+    para_1 = find_best_fit(data, x_data, y_data1, fit_degree)
 
     # Flatten fit line for plotting
-    fit1_flat = p1(data[x_data]).values.flatten()
+    fit1_flat = para_1(data[x_data]).values.flatten()
 
     # Plot fit of 1st dataset
     ax1.plot(data[x_data], fit1_flat, '-', color=color1)
@@ -329,10 +329,10 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     ax1.set_ylabel(f"{y_label1} and {y_label2}")
 
     # Find fit line of 2nd dataset
-    p2 = find_best_fit(data, x_data, y_data2, fit_degree)
+    para_2 = find_best_fit(data, x_data, y_data2, fit_degree)
 
     # Flatten fit line for plotting
-    fit2_flat = p2(data[x_data]).values.flatten()
+    fit2_flat = para_2(data[x_data]).values.flatten()
 
     # Plot fit for 2nd element
     ax1.plot(data[x_data], fit2_flat, '-', color=color2)
@@ -406,10 +406,10 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
 
     # Find best fit of first dataset if requested
     if fit in ['first', 'both']:
-        p1 = find_best_fit(data, x_data, y_data1, fit_degree)
+        para_1 = find_best_fit(data, x_data, y_data1, fit_degree)
 
         # Plot line of best fit
-        ax1.plot(data[x_data], p1(data[x_data]), '-', color=color1)
+        ax1.plot(data[x_data], para_1(data[x_data]), '-', color=color1)
 
     # Add stylized title for 1st Y axis
     y_titles = LABEL_DICT[y_data1][0]
@@ -432,10 +432,10 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
 
         # Find best fit of second dataset if requested
         if fit in ['second', 'both']:
-            p2 = find_best_fit(data, x_data, y_data2, fit_degree)
+            para_2 = find_best_fit(data, x_data, y_data2, fit_degree)
 
             # Plot line of best fit
-            ax2.plot(data[x_data], p2(data[x_data]), '-', color=color2)
+            ax2.plot(data[x_data], para_2(data[x_data]), '-', color=color2)
 
     # Concatenate graph titles into fully auto-generated graph title
     graph_title = f"{y_titles} v. {LABEL_DICT[x_data][0]} for {MONTH_DICT[month_num]}"

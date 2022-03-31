@@ -1,10 +1,12 @@
-from helpers import *
-from constants import *
+"""
+Loops through list of cities, scrapes data for each city
+Packs each set of data into DataFrame
+Cleans off specified number of rows at beginning of DataFrame
+Saves DataFrame into correspondingly-named CSV in /data directory
+"""
 
-# Loops through list of cities, scrapes data for each city
-# Packs each set of data into DataFrame
-# Cleans off specified number of rows at beginning of DataFrame
-# Saves DataFrame into correspondingly-named CSV in /data directory
+from helpers import get_dataframe, clean_data
+from constants import DEFAULT_URL, CITIES
 
 # Loop through all city names
 for city in CITIES:
