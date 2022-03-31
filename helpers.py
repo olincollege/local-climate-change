@@ -30,7 +30,7 @@ def convert_year(input_year_series):
 
         # Convert month number 1-12 into decimal (fraction over 12)
         month = float(input_year_series[i][1]) / 12
-
+        print(input_year_series[i][1])
         # Make year into its own object
         year = input_year_series[i][0]
 
@@ -83,6 +83,7 @@ def clean_data(dataframe, city):
         DataFrame: Returns DataFrame after initial rows have been dropped and
             dates reformatted.
     """
+
     # Remove first X rows and reindex because some cities have a bunch of data
     # missing in the first few years.
     dataframe.drop(range(CITIES[city][1]), axis=0, inplace=True)
@@ -114,6 +115,8 @@ def compile_CSVs():
 
     # Loops through cities
     for city in CITIES:
+        if 'clean data test' in city:  # do not include clean data unit tests
+            continue
         # For each city, pull from CSV, save to DataFrame (while skipping
         # extra header rows) and save into dictionary.
         df_dict[city] = pd.read_csv(

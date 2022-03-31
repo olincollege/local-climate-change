@@ -14,8 +14,13 @@ CITIES = {
     'Anchorage, Alaska': ['anchorage', 2],
     # 'London': ['london', 1],
     'Minneapolis': ['minneapolis', 147],
-    'Temperature Experiment': ['test', 12]
+    'Temperature Experiment': ['test', 12],
+    'clean data test 1': ['clean 1', 1],
+    'clean data test 2': ['clean 2', 4],
+    'clean data test 3': ['clean 3', 1],
+    'clean data test 4': ['clean 4', 2]
 }
+print(len(CITIES))
 
 # 'columnHeader': ['For Graph Title', 'For Graph Axis Labels']
 LABEL_DICT = {
