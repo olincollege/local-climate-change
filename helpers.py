@@ -1,3 +1,7 @@
+"""
+All helper functions stored in this file.
+"""
+
 import pandas as pd
 import requests
 import matplotlib.pyplot as plt
@@ -26,13 +30,13 @@ def convert_year(input_year_series):
         list: List of float dates
     """
     added_list = []
-    for i in range(len(input_year_series)):
+    for item in input_year_series:
 
         # Convert month number 1-12 into decimal (fraction over 12)
-        month = float(input_year_series[i][1]) / 12
-        print(input_year_series[i][1])
+        month = float(item[1]) / 12
+
         # Make year into its own object
-        year = input_year_series[i][0]
+        year = item[0]
 
         # Append year + month decimal to list
         added_list.append(float(year) + month)
@@ -97,7 +101,7 @@ def clean_data(dataframe, city):
     return dataframe
 
 
-def compile_CSVs():
+def compile_csvs():
     """
     Loops through all of the listed cities and reads from each of the
     corresponding CSVs. Saves each of these DataFrames into a dictionary.
@@ -114,28 +118,28 @@ def compile_CSVs():
     df_dict = {}
 
     # Loops through cities
-    for city in CITIES:
-        if 'clean data test' in city:  # do not include clean data unit tests
+    for item in CITIES.items():
+        # do not include clean data unit tests
+        if 'clean data test' in item[0]:
             continue
         # For each city, pull from CSV, save to DataFrame (while skipping
         # extra header rows) and save into dictionary.
-        df_dict[city] = pd.read_csv(
-            f'data/{CITIES[city][0]}_weather.csv', skiprows=[1, 2])
+        df_dict[item[0]] = pd.read_csv(
+            f'data/{item[1][0]}_weather.csv', skiprows=[1, 2])
 
     # Return this new dictionary of DataFrames
     return df_dict
 
 
-def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
+def plot_single_series(axes, x_data, y_data, color, scatter_type):
     """
     Takes one set of X data and one set of Y data and plots a scatter plot on
     the given Axes, returning the modified Axes.
 
     Args:
-        ax (Axes): Axes object to add scatter plot to
+        axes (Axes): Axes object to add scatter plot to
         x_data (Series): Dataset of X points
         y_data (Series): Dataset of Y points
-        y_label (str): String for Y Label name
         color (str): Color name for scatter plot and axis labels
         scatter_type (str): Scatter plot line type for plt.plot ('.', '-', etc)
 
@@ -144,15 +148,15 @@ def plot_single_series(ax, x_data, y_data, y_label, color, scatter_type):
     """
 
     # Set Y Label and Y Label Color based on parameters
-    ax.set_ylabel(y_label, color=color)
+    axes.set_ylabel(LABEL_DICT[y_data.name][1], color=color)
 
     # Plot single set of data
-    ax.plot(x_data, y_data, scatter_type, color=color, alpha=0.4)
+    axes.plot(x_data, y_data, scatter_type, color=color, alpha=0.4)
 
     # Add axis tick marks
-    ax.tick_params(axis='y', labelcolor=color)
+    axes.tick_params(axis='y', labelcolor=color)
 
-    return ax
+    return axes
 
 
 def filter_month(data, month_num):
@@ -200,7 +204,7 @@ def find_best_fit(data, x_data, y_data, fit_degree):
         fit_degree (int): Degree of polynomial fit.
 
     Returns:
-        p (Series): Series containing polynomial fit equation
+        poly (Series): Series containing polynomial fit equation
     """
 
     # Drop any rows with NaN values in the columns we are using, to not upset
@@ -211,10 +215,10 @@ def find_best_fit(data, x_data, y_data, fit_degree):
     y_dataset = data[y_data]
 
     # Find polynomial fit
-    p = P.fit(x_dataset.values.flatten(),
-              y_dataset.values.flatten(), fit_degree)
+    poly = P.fit(x_dataset.values.flatten(),
+                 y_dataset.values.flatten(), fit_degree)
 
-    return p
+    return poly
 
 
 def plot_bar_decade(data, date_range, y_data):
@@ -242,7 +246,7 @@ def plot_bar_decade(data, date_range, y_data):
     current_decade_index = 0
 
     # Loops through DataFrame rows
-    for i, row in data.iterrows():
+    for _, row in data.iterrows():
 
         # If the date is past the end year, break the loop
         if row['date'] >= date_range[1]:
@@ -277,8 +281,7 @@ def plot_bar_decade(data, date_range, y_data):
     plt.show()
 
 
-def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
-                    color2='blue', month_num=0, fit_degree=1):
+def plot_in_between(data, x_data, y_data, month_num=0, fit_degree=1):
     """
     Graphs lines of best fit for 2 datasets, fills area between these two
     lines.
@@ -287,12 +290,8 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
         data (DataFrame): DataFrame of weather data.
         x_data (str): DataFrame column label for x dataset. Expects 'date' or
             or 'avgLowTemp' format.
-        y_data1 (str): DataFrame column label for 1st y dataset. Expects 'date'
-            or 'avgLowTemp' format.
-        y_data2 (str): DataFrame column label for 2nd y dataset. Expects 'date'
-            or 'avgLowTemp' format.
-        color1 (str, optional): Color of 1st line plot. Defaults to 'red'.
-        color2 (str, optional): Color of 2nd line plot. Defaults to 'blue'.
+        y_data (list): List containing DataFrame column labels for 1st and 2nd
+            y datasets. Expects ['date', 'avgLowTemp'] format.
         month_num (int, optional): Integer representing which month of the year
             to plot year-over-year data for. 1 is January, 2 is February, etc.
             Defaults to 0, which graphs lines for all months together.
@@ -306,7 +305,10 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     if month_num != 0:
         data = filter_month(data, month_num)
 
-    fig, ax1 = plt.subplots()
+    ax1 = plt.subplots()[1]
+
+    y_data1 = y_data[0]
+    y_data2 = y_data[1]
 
     # Set X label to stylized version of the column header
     x_label = LABEL_DICT[x_data][1]
@@ -320,10 +322,10 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     para_1 = find_best_fit(data, x_data, y_data1, fit_degree)
 
     # Flatten fit line for plotting
-    fit1_flat = para_1(data[x_data]).values.flatten()
+    para_1 = para_1(data[x_data]).values.flatten()
 
     # Plot fit of 1st dataset
-    ax1.plot(data[x_data], fit1_flat, '-', color=color1)
+    ax1.plot(data[x_data], para_1, '-', color='red')
 
     # Set Y axis label
     ax1.set_ylabel(f"{y_label1} and {y_label2}")
@@ -332,14 +334,14 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     para_2 = find_best_fit(data, x_data, y_data2, fit_degree)
 
     # Flatten fit line for plotting
-    fit2_flat = para_2(data[x_data]).values.flatten()
+    para_2 = para_2(data[x_data]).values.flatten()
 
     # Plot fit for 2nd element
-    ax1.plot(data[x_data], fit2_flat, '-', color=color2)
+    ax1.plot(data[x_data], para_2, '-', color='blue')
 
     # Fill between both fit lines.
     ax1.fill_between(data[x_data].values.flatten(),
-                     fit1_flat, fit2_flat, alpha=.5, linewidth=0)
+                     para_1, para_2, alpha=.5, linewidth=0)
 
     # Concatenate both Y titles
     y_titles = LABEL_DICT[y_data1][0] + " and " + LABEL_DICT[y_data2][0]
@@ -354,8 +356,7 @@ def plot_in_between(data, x_data, y_data1, y_data2, color1='red',
     plt.show()
 
 
-def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
-                        color2='blue', scatter_type='', fit='none',
+def plot_double_scatter(data_list, y_data2='', fit='none',
                         month_num=0, fit_degree=1):
     """
     Takes a DataFrame of weather data and 1-2 column names, along with some
@@ -363,18 +364,15 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
     of best fit for the plots.
 
     Args:
-        data (DataFrame): DataFrame of weather data.
-        x_data (str): DataFrame column label for x dataset. Expects 'date' or
-            or 'avgLowTemp' format.
-        y_data1 (str): DataFrame column label for 1st y dataset. Expects 'date'
-            or 'avgLowTemp' format.
+        data_list (list): List containing multiple required arguments:
+            data (DataFrame): DataFrame of weather data.
+            x_data (str): DataFrame column label for x dataset. Expects 'date'
+                or 'avgLowTemp' format.
+            y_data1 (str): DataFrame column label for 1st y dataset. Expects
+                'date' or 'avgLowTemp' format.
         y_data2 (str, optional): DataFrame column label for 2nd y dataset.
             Expects 'date' or 'avgLowTemp' format. Defaults to '', wherein the
             function only plots 1 dataset.
-        color1 (str, optional): Color of 1st scatter plot. Defaults to 'red'.
-        color2 (str, optional): Color of 2nd scatter plot. Defaults to 'blue'.
-        scatter_type (str, optional): Determines the matplotlib.plot parameter
-            `fmt` for both scatter plots. Defaults to ''.
         fit (str, optional): Determines which, if any, of the plots should also
             have a line of best fit. Options are ('none', 'both', 'first',
             'second'). Defaults to 'none'.
@@ -385,31 +383,30 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
         fit_degree (int, optional): Integer representing degree of polynomial
             fit for lines of best fit. Defaults to 1, signifying a linear fit.
     """
+    # Separate arguments from list
+    data = data_list[0]
+    x_data = data_list[1]
+    y_data1 = data_list[2]
 
     # If month_num is 0, all months should be plotted. Otherwise, filter data
     # to drop everything except the requested month.
     if month_num != 0:
         data = filter_month(data, month_num)
 
-    fig, ax1 = plt.subplots()
-
-    # Set X and Y1 labels to stylized versions of the column headers
-    x_label = LABEL_DICT[x_data][1]
-    y_label1 = LABEL_DICT[y_data1][1]
+    ax1 = plt.subplots()[1]
 
     # Add X axis label
-    ax1.set_xlabel(x_label)
+    ax1.set_xlabel(LABEL_DICT[x_data][1])
 
     # Add Data, Label, Color, and Point Type to 1 set of Y axis data
-    ax1 = plot_single_series(ax1, data[x_data], data[y_data1],
-                             y_label1, color1, scatter_type)
+    ax1 = plot_single_series(ax1, data[x_data], data[y_data1], 'red', '')
 
     # Find best fit of first dataset if requested
     if fit in ['first', 'both']:
         para_1 = find_best_fit(data, x_data, y_data1, fit_degree)
 
         # Plot line of best fit
-        ax1.plot(data[x_data], para_1(data[x_data]), '-', color=color1)
+        ax1.plot(data[x_data], para_1(data[x_data]), '-', color='red')
 
     # Add stylized title for 1st Y axis
     y_titles = LABEL_DICT[y_data1][0]
@@ -420,22 +417,19 @@ def plot_double_scatter(data, x_data, y_data1, y_data2='', color1='red',
         # Add stylized title for 2nd Y axis
         y_titles = y_titles + " and " + LABEL_DICT[y_data2][0]
 
-        # Set Y2 label to stylized version of column header
-        y_label2 = LABEL_DICT[y_data2][1]
-
         # Adding Twin Axes
         ax2 = ax1.twinx()
 
         # Add Data, Label, Color, and Point Type to another set of Y axis data
         ax2 = plot_single_series(ax2, data[x_data], data[y_data2],
-                                 y_label2, color2, scatter_type)
+                                 'blue', '')
 
         # Find best fit of second dataset if requested
         if fit in ['second', 'both']:
             para_2 = find_best_fit(data, x_data, y_data2, fit_degree)
 
             # Plot line of best fit
-            ax2.plot(data[x_data], para_2(data[x_data]), '-', color=color2)
+            ax2.plot(data[x_data], para_2(data[x_data]), '-', color='blue')
 
     # Concatenate graph titles into fully auto-generated graph title
     graph_title = f"{y_titles} v. {LABEL_DICT[x_data][0]} for {MONTH_DICT[month_num]}"

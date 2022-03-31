@@ -10,7 +10,7 @@ import numpy as np
 from helpers import (
     convert_year,
     clean_data,
-    compile_CSVs,
+    compile_csvs,
     filter_month
 )
 
@@ -83,7 +83,7 @@ clean_data_cases = [
     (cdtest4, 'clean data test 4', cdtest4a),
 ]
 
-compile_CSVs_cases = [
+compile_csvs_cases = [
     {'Temperature Experiment':
         pd.DataFrame(data={
             'date': np.divide(range(24013, 24072), 12),
@@ -177,15 +177,15 @@ def test_clean_data(dataframe, city, output_dataframe):
     assert all(clean_data(dataframe, city).reset_index == output_dataframe)
 
 
-@ pytest.mark.parametrize("df_dict", compile_CSVs_cases)
-def test_compile_CSVs(df_dict):
+@ pytest.mark.parametrize("df_dict", compile_csvs_cases)
+def test_compile_csvs(df_dict):
     """
-    Test if compile_CSVs is working against a test data set.
+    Test if compile_csvs is working against a test data set.
 
     Args:
         df_dict (dictionary): Dictionary containing a singular test dataframe
     """
-    assert all(compile_CSVs()[
+    assert all(compile_csvs()[
         'Temperature Experiment'] == df_dict['Temperature Experiment'])
 
 
