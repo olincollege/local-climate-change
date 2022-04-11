@@ -1,6 +1,7 @@
 # local-climate-change
 
 This repository contains the midterm project for the Software Design course at Olin College of Engineering in Needham, MA.
+[Link to Report File](https://github.com/olincollege/local-climate-change/blob/main/weather_analysis.ipynb)
 
 ## Description
 
